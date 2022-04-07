@@ -1,0 +1,4 @@
+.ipynb_checkpoints
+natsEndpoint.creds
+.env
+!.env.template

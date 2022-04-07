@@ -1,0 +1,29 @@
+kind: Namespace
+apiVersion: v1
+metadata:
+  name: mount
+  labels:
+    name: mount
+---
+apiVersion: core.oam.dev/v1beta1
+kind: Application
+metadata:
+  name: mount
+  namespace: mount
+spec:
+  components:
+    - name: rw-files
+      type: edge-worker
+      properties:
+        image: ci4rail/rw-files
+        name: rw-files
+      traits:
+        - type: volumes
+          properties:
+            volumes:
+              - name: mount-name
+                type: hostPath
+                path: /data/path-on-host/
+                mountPath: /path-in-container
+                mountType: DirectoryOrCreate
+                readOnly: false
