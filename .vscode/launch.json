@@ -1,0 +1,35 @@
+{
+    "version": "0.2.0",
+    "configurations": [
+        {
+            "name": "mount - rw-file",
+            "type": "python",
+            "request": "launch",
+            "program": "${workspaceFolder}/mount/rw-files/main.py",
+            "console": "integratedTerminal",
+            "env": {
+                "WRITE_FILE": "/tmp/write-file.txt",
+                "READ_FILE": "/tmp/read-file.txt"
+            }
+        },
+        {
+            "name": "data-export - publish-export-data",
+            "type": "python",
+            "request": "launch",
+            "justMyCode": false,
+            "program": "${workspaceFolder}/data-export/publish-export-data/main.py",
+            "console": "integratedTerminal"
+        },
+        {
+            "name": "data-export - receive-historic-data",
+            "type": "python",
+            "request": "launch",
+            "program": "${workspaceFolder}/data-export/receive-historic-data/main.py",
+            "console": "integratedTerminal",
+            "justMyCode": true,
+            "env": {
+                "NATS_CREDS_PATH": "data-export/natsEndpoint.creds"
+            }
+        }
+    ]
+}

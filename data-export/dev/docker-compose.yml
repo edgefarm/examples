@@ -1,0 +1,52 @@
+version: "3.9"
+
+services:
+  nats:
+    image: nats
+    hostname: nats
+    container_name: nats
+    command: [ "-js" ]
+    expose:
+      - "4222"
+      - "6222"
+      - "8222"
+    ports:
+      - "4222:4222"
+      - "6222:6222"
+      - "8222:8222"
+    networks:
+      - edgefarm-dev
+
+  dapr:
+    image: daprio/daprd:nightly-2022-03-13
+    command:
+      [
+        "./daprd",
+        "--dapr-grpc-port",
+        "3500",
+        "--components-path",
+        "/components",
+        "--dapr-http-port",
+        "3501",
+        "--app-port",
+        "50001",
+        "--app-protocol",
+        "grpc",
+        "--app-id",
+        "publish-export-data",
+        "--log-level",
+        "debug"
+      ]
+    expose:
+      - "3500"
+      - "3501"
+    volumes:
+      - ./dapr-components:/components
+    ports:
+      - "3500:3500"
+      - "3501:3501"
+    networks:
+      - edgefarm-dev
+
+networks:
+  edgefarm-dev:
