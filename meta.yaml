@@ -1,0 +1,18 @@
+# ===================================================
+# meta infos
+# ===================================================
+
+meta:
+  project: train-simulation
+  include:
+    - dobi.yaml
+    - mount/dobi.yaml
+    - version.yaml
+
+alias=build:
+  tasks:
+    - build-and-push-rw-files
+  annotations:
+    description: "\t\t\t\t-> [alias] build (and push) all"
+    tags:
+      - alias

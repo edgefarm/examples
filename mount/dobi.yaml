@@ -1,0 +1,18 @@
+# ===================================================
+# jobs
+# ===================================================
+job=build-and-push-rw-files:
+  use: dind-buildx
+  depends: [install-qemu-user-static]
+  provide-docker: true
+  mounts:
+    - mount-project
+    - mount-docker-config
+  interactive: true
+  command: sh -c "cd /project/mount;
+    docker buildx build -f build/Dockerfile --push --platform linux/arm64,linux/amd64 --tag ${DOCKER_REGISTRY}/dev-rw-files:${VERSION} --tag ${DOCKER_REGISTRY}/dev-rw-files:latest rw-files;"
+  env:
+    - DOCKER_DRIVER=overlay2
+    - VERSION={env.GitVersion_ShortSha}
+  annotations:
+    description: "\t\t\t-> builds and pushes rw-files multiarch docker image"

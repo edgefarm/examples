@@ -1,0 +1,16 @@
+{
+    "version": "0.2.0",
+    "configurations": [
+        {
+            "name": "mount - rw-file",
+            "type": "python",
+            "request": "launch",
+            "program": "${workspaceFolder}/mount/rw-files/main.py",
+            "console": "integratedTerminal",
+            "env": {
+                "WRITE_FILE": "/tmp/write-file.txt",
+                "READ_FILE": "/tmp/read-file.txt"
+            }
+        }
+    ]
+}
