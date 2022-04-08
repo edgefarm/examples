@@ -2,7 +2,9 @@
 
 This example shows how to mount a directory into an application container on edge device.
 
-The edge application reads a file mounted from the edge device line by line and writes the content together with a time stamp into another file.
+The edge application `rw-files` reads a file mounted from the edge device line by line and writes the content together with a time stamp into another file.
+
+The file mount is defined in the deployment manifest `manifest.yaml`. The trait of type `volume` defines the volumes names, paths and permissions.
 
 ## Usage
 
