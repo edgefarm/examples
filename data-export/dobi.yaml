@@ -1,0 +1,18 @@
+# ===================================================
+# jobs
+# ===================================================
+job=build-and-push-publish-export-data:
+  use: dind-buildx
+  depends: [install-qemu-user-static]
+  provide-docker: true
+  mounts:
+    - mount-project
+    - mount-docker-config
+  interactive: true
+  command: sh -c "cd /project/data-export;
+    docker buildx build -f build/Dockerfile --push --platform linux/arm64,linux/amd64 --tag ${DOCKER_REGISTRY}/dev-publish-export-data:${VERSION} --tag ${DOCKER_REGISTRY}/dev-publish-export-data:latest publish-export-data;"
+  env:
+    - DOCKER_DRIVER=overlay2
+    - VERSION={env.GitVersion_ShortSha}
+  annotations:
+    description: "\t\t-> builds and pushes publish-export-data multiarch docker image"

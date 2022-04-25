@@ -1,0 +1,86 @@
+name: publish-export-data
+on:
+  push:
+    branches:
+      - main
+    paths:
+      - "data-export/build/**"
+      - "data-export/publish-export-data/**"
+  pull_request:
+    branches:
+      - main
+    paths:
+      - "data-export/build/**"
+      - "data-export/publish-export-data/**"
+
+env:
+  ARCHITECTURES: linux/arm64,linux/amd64
+  DOCKER_REPOSITORY: ci4rail
+  DOCKER_USERNAME: ${{ secrets.DOCKER_USERNAME }}
+  DOCKER_PASSWORD: ${{ secrets.DOCKER_PASSWORD }}
+  IMAGE_NAME: publish-export-data
+
+jobs:
+  build-publish-export-data-docker-image:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v2
+        with:
+          fetch-depth: 0
+      - name: Install GitVersion
+        uses: gittools/actions/gitversion/setup@v0.9.7
+        with:
+          versionSpec: "5.x"
+      - name: Determine Version
+        id: gitversion
+        uses: gittools/actions/gitversion/execute@v0.9.7
+      - name: Get git sha as on PR gitversion provides incorrect sha
+        id: shortSha
+        env:
+          EVENT_NAME: ${{ github.event_name }}
+        run: |
+          if [ "$EVENT_NAME" = "pull_request" ]; then
+              echo "::set-output name=shortSha::`echo ${{ github.event.pull_request.head.sha }} | cut -c1-8`"
+          elif [ "$EVENT_NAME" = "push" ]; then
+              echo "::set-output name=shortSha::${GITHUB_SHA::8}"
+          else
+              exit 1
+          fi
+      - name: Generate Image name dependend on github event
+        id: eventCheck
+        env:
+          EVENT_NAME: ${{ github.event_name }}
+        run: |
+          if [ "$EVENT_NAME" = "pull_request" ]; then
+              echo "::set-output name=namePrefix::dev-"
+          elif [ "$EVENT_NAME" = "push" ]; then
+              echo "::set-output name=namePrefix::"
+          else
+              exit 1
+          fi
+      - name: Log into Docker
+        run: echo ${DOCKER_PASSWORD} | docker login -u ${DOCKER_USERNAME} --password-stdin
+      - name: Set up QEMU
+        id: qemu
+        uses: docker/setup-qemu-action@v1
+        with:
+          image: tonistiigi/binfmt:latest
+          platforms: ${{ env.ARCHITECTURES }}
+      - name: Set up Docker Buildx
+        id: buildx
+        uses: docker/setup-buildx-action@v1
+        with:
+          version: v0.6.0
+      - name: Build
+        env:
+          VERSION: ${{ steps.shortSha.outputs.shortSha }}
+          PREFIX: ${{ steps.eventCheck.outputs.namePrefix }}
+        run: |
+          cd data-export;
+          docker buildx build \
+                      -f build/Dockerfile \
+                      --push \
+                      --platform ${ARCHITECTURES} \
+                      --tag ${DOCKER_REPOSITORY}/${PREFIX}${IMAGE_NAME}:latest \
+                      --tag ${DOCKER_REPOSITORY}/${PREFIX}${IMAGE_NAME}:${VERSION} publish-export-data

@@ -7,11 +7,13 @@ meta:
   include:
     - dobi.yaml
     - mount/dobi.yaml
+    - data-export/dobi.yaml
     - version.yaml
 
 alias=build:
   tasks:
     - build-and-push-rw-files
+    - build-and-push-publish-export-data
   annotations:
     description: "\t\t\t\t-> [alias] build (and push) all"
     tags:

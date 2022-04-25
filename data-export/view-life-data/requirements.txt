@@ -1,0 +1,4 @@
+ipython==8.2.0
+matplotlib==3.5.1
+nats_py==2.1.0
+numpy==1.19.2

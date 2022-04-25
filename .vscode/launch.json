@@ -11,6 +11,38 @@
                 "WRITE_FILE": "/tmp/write-file.txt",
                 "READ_FILE": "/tmp/read-file.txt"
             }
+        },
+        {
+            "name": "data-export - publish-export-data",
+            "type": "python",
+            "request": "launch",
+            "program": "${workspaceFolder}/data-export/publish-export-data/main.py",
+            "console": "integratedTerminal",
+            "env": {
+                "NATS_SERVER": "nats://localhost:4222"
+            }
+        },
+        {
+            "name": "data-export - publish-export-data - connect global",
+            "type": "python",
+            "request": "launch",
+            "program": "${workspaceFolder}/data-export/publish-export-data/main.py",
+            "console": "integratedTerminal",
+            "env": {
+                "NATS_SERVER": "tls://connect.ngs.global:4222",
+                "NATS_CREDS_PATH": "${env:HOME}/.nkeys/creds/synadia/ngs0004/ngs0004_user.creds"
+            }
+        },
+        {
+            "name": "data-export - receive-historic-data",
+            "type": "python",
+            "request": "launch",
+            "program": "${workspaceFolder}/data-export/receive-historic-data/main.py",
+            "console": "integratedTerminal",
+            "justMyCode": false,
+            "env": {
+                "NATS_CREDS_PATH": "${env:HOME}/.nkeys/creds/synadia/ngs0004/ngs0004_customer.creds"
+            }
         }
     ]
 }

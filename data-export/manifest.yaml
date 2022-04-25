@@ -1,0 +1,31 @@
+kind: Namespace
+apiVersion: v1
+metadata:
+  name: data-export
+  labels:
+    name: data-export
+---
+apiVersion: core.oam.dev/v1beta1
+kind: Application
+metadata:
+  name: data-export
+  namespace: data-export
+spec:
+  components:
+    - name: publish-export-data
+      type: edge-worker
+      properties:
+        image: ci4rail/publish-export-data
+        name: publish-export-data
+        env:
+          - name: NATS_CREDS_PATH
+            value: /nats-credentials/data-export-network.creds
+      traits:
+        - type: edge-network-participant
+          properties:
+            networks:
+              - data-export-network
+    - type: application-network
+      name: data-export-network
+      properties:
+        streams: []

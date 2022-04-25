@@ -16,7 +16,7 @@ spec:
       type: edge-worker
       properties:
         image: ci4rail/rw-files
-        name: receive-highres-position
+        name: rw-files
       traits:
         - type: volumes
           properties:

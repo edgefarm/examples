@@ -2,6 +2,7 @@
 
 This repository contains minimal examples for edgefarm usage.
 
+- [Export data from edgefarm.network](data-export/README.md) [![publish-export-data](https://github.com/edgefarm/examples/actions/workflows/publish-export-data.yaml/badge.svg)](https://github.com/edgefarm/examples/actions/workflows/publish-export-data.yaml)
 - [Mount directory into an edgefarm appliation](mount/README.md) [![rw-files](https://github.com/edgefarm/examples/actions/workflows/rw-files.yaml/badge.svg)](https://github.com/edgefarm/examples/actions/workflows/rw-files.yaml)
 
 ## Building yourself
