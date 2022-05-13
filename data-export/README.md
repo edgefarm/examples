@@ -69,6 +69,7 @@ kubectl get secrets -o jsonpath='{.data.NATS_ADDRESS}' nats-server-info | base64
 Execute `receive-historic-data` application to collect histroic data from data endpoint and store data in local file `data.csv`.
 ```bash
 $ cd data-export/receive-historic-data
+$ pip3 install -r requirements.txt
 $ python main.py
 2022-04-25 16:23:13 root         INFO     Connecting to NATS server: tls://connect.ngs.global:4222
 2022-04-25 16:23:48 root         INFO     Received all historic data. Proceed with live data.
@@ -90,3 +91,5 @@ To run Jupyter Notebook open the file `data-export/view-life-data/main.ipynb` e.
 Scroll down to the bottom of the file to view the graph.
 
 ![Jupyter Output Example](../docs/data-export-jupyter-output.png)
+
+**⚠ NOTE:** If you experience issues with the notebook regarding missing packages please run `pip3 install -r requirements.txt` in the notebook directory.
