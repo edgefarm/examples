@@ -15,7 +15,9 @@ spec:
     - name: publish-export-data
       type: edge-worker
       properties:
-        image: ci4rail/publish-export-data
+        runtime:
+          - publish-export-data
+        image: ci4rail/publish-export-data:latest
         name: publish-export-data
       traits:
         - type: edge-network-participant
@@ -25,17 +27,33 @@ spec:
     - type: application-network
       name: data-export-network
       properties:
-        streams:
-          - name: data-export-stream
+        subjects:
+          - name: data-export-subjects
             subjects:
               - EXPORT.>
-            storage: file
-            public: true
-            global: true
-            retention: limits
-            maxMsgsPerSubject: -1
-            maxMsgs: -1
-            maxBytes: 6442450944
-            maxAge: 10d
-            maxMsgSize: -1
-            discard: old
+            stream: data-export-stream
+        streams:
+          - name: data-export-stream
+            location: node
+            config:
+              storage: file
+              retention: limits
+              maxMsgsPerSubject: -1
+              maxMsgs: -1
+              maxBytes: 1073741824
+              maxAge: 10d
+              maxMsgSize: -1
+              discard: old
+          - name: data-export-stream-aggregate
+            location: main
+            link:
+              stream: data-export-stream
+            config:
+              storage: file
+              retention: limits
+              maxMsgsPerSubject: -1
+              maxMsgs: -1
+              maxBytes: 6442450944
+              maxAge: 10d
+              maxMsgSize: -1
+              discard: old

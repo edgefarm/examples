@@ -39,7 +39,7 @@ publish-export-data-bjsrk   3/3     Running   0          3m4s   172.17.0.2   rpi
 View the logs of the application. Viewing can be terminated with `Ctrl+C`.
 
 ```bash
-$ kubectl logs publish-export-data-bjsrk -n data-export -f
+$ kubectl logs publish-export-data-bjsrk -n data-export -c publish-export-data -f
 2022-04-08 12:58:01 root         INFO     Connecting to NATS server: nats://nats.nats:4222
 2022-04-08 12:58:16 root         INFO     Published 1000 messages in 15 seconds. Total size: 257750. Byte per Second:  17183.
 2022-04-08 12:58:22 root         INFO     Published 1000 messages in 16 seconds. Total size: 257722. Byte per Second:  16107.
