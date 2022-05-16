@@ -40,7 +40,7 @@ View the logs of the application. Viewing can be terminated with `Ctrl+C`.
 
 ```bash
 $ kubectl logs publish-export-data-bjsrk -n data-export -c publish-export-data -f
-2022-04-08 12:58:01 root         INFO     Connecting to NATS server: nats://nats.nats:4222
+2022-04-08 12:58:01 root         INFO     Connecting to NATS server: nats://leaf-nats.nats:4222
 2022-04-08 12:58:16 root         INFO     Published 1000 messages in 15 seconds. Total size: 257750. Byte per Second:  17183.
 2022-04-08 12:58:22 root         INFO     Published 1000 messages in 16 seconds. Total size: 257722. Byte per Second:  16107.
 ...
@@ -67,12 +67,24 @@ kubectl get secrets -o jsonpath='{.data.NATS_ADDRESS}' nats-server-info | base64
 **Receive the historic data:**
 
 Execute `receive-historic-data` application to collect histroic data from data endpoint and store data in local file `data.csv`.
+
 ```bash
 $ cd data-export/receive-historic-data
 $ pip3 install -r requirements.txt
-$ python main.py
+
+# Run normally without verbose logs...
+$ python3 main.py
 2022-04-25 16:23:13 root         INFO     Connecting to NATS server: tls://connect.ngs.global:4222
 2022-04-25 16:23:48 root         INFO     Received all historic data. Proceed with live data.
+
+# ... or run it with verbose logs
+$ LOGLEVEL=DEBUG python3 main.py
+2022-05-16 21:33:20 asyncio      DEBUG    Using selector: EpollSelector
+2022-05-16 21:33:20 root         INFO     Connecting to NATS server: nats://hb001.edgefarm.io:4222
+2022-05-16 21:33:21 root         DEBUG    Received data: {'timestamp_ms': 1652729464720, 'msg_id': 16174, 'sensor1': {'x': 0.129648, 'y': 0.50633, 'z': 0.058441}, 'sensor2': {'x': 0.129648, 'y': 0.50633, 'z': 0.058441}}
+2022-05-16 21:33:21 root         DEBUG    Write to file: 2022-05-16,21:31:04.720000,0.129648,0.506330,0.058441,0.129648,0.506330,0.058441
+2022-05-16 21:33:21 root         DEBUG    Received data: {'timestamp_ms': 1652729464739, 'msg_id': 16175, 'sensor1': {'x': 0.157909, 'y': 0.423882, 'z': 0.034252}, 'sensor2': {'x': 0.157909, 'y': 0.423882, 'z': 0.034252}}
+
 ```
 
 The output csv file can be configured by executing the following just before executing the application. The file does not have to exist, but the path does.
