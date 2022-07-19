@@ -1,34 +1,71 @@
 # data-export
 
-This example shows how to export data from edgefarm.network to an external system.
+This example shows the data transport via edgefarm.network and the transfer of this data to external systems.
 
-The edge application `publish-export-data` generates random data and publishes it into edgefarm.network data export.
+For this purpose, an edgefarm.applications app will be rolled out in an edge node and continuously generates data. 
+This data will be pushes into edgefarm.network and delivered to the external system.
 
-The deployment manifest `manifest.yaml` defines an `application-network`, which is required for data transportation. The producing `edge-worker` needs to be a `participant` of this network. This is defined in the trait `edge-network-participant`. The network needs to have a stream, which is required for data puffering and data export. This is configured in stream section of the `application-network`.
+The external system, in this example `receive-historic-data`, receives the puffered data and stores it into a local `csv` file.
 
-The separate application `receive-historic-data`, which could run anywhere but requires a internet connection, receives the puffered data and stores it into a local `csv` file.
-
-The Jupyter Notebook `view-life-data`, can be used to receive live data from data endpoint and view it in graphs.
+The Jupyter Notebook `view-life-data`, can be used to receive and visualize live data from edgefarm.network.
 
 ## Usage
 
-**Deploy edge application:**
+**Deploy example:**
 
-`manifest.yaml` is the deployment manifest of this example. This contains a reference to the docker image of example application `publish-export-data`. Modify the docker image's tag for the correct version of the application image.
+First, create a kubernetes namespace in which to create the edge application and the network.  
+
+```
+kubectl create ns data-export
+
+namespace/data-export created
+```
+
+Next, the application network will be created in which attributes are defined, such as valid subjects or buffer sizes within the network.
+
+```
+kubectl apply -f manifest/network.yaml -n data-export
+
+application.core.oam.dev/data-export-network created
+```
+
+This creates a new application network within edgefarm.network. This network consists of a 10 MB intermediate buffer on the participating edge nodes and a 100 MB buffer in the main network (usually in the cloud), which collects and aggregates the edge buffers.
+All buffers are managed in the respective file system. Alternatively, they can also be created in memory.
+
+The application definition `manifest/application.yaml` contains a reference to the docker image of example application `publish-export-data`. If necessary, you can modify the docker image's tag for the correct version of the application image. 
 
 You can either build your own docker image if you like to modify the demos. For this see the [building section](../README.md#building-yourself) of this Readme.
+After any modifications, you need to redeploy the application.
 
-Apply the application using kubectl.
+Now, the actual edge application will be rolled out.
 
-```bash
-$ kubectl apply -f data-export/manifest.yaml
-namespace/data-export created
+```
+$ kubectl apply -f manifest/application.yaml -n data-export
+
 application.core.oam.dev/data-export created
 ```
 
-**Check the status of the edge application:**
+The corresponding label for the edge-node must be set.
 
-Check if the application is running.
+```
+$ kubectl get nodes
+
+NAME           STATUS   ROLES                      AGE    VERSION
+axolotl        Ready    agent,edge                 6d7h   v1.19.3-kubeedge-v1.9.1
+test001-1      Ready    controlplane,etcd,worker   20d    v1.21.7
+test001-2      Ready    controlplane,etcd,worker   20d    v1.21.7
+test001-3      Ready    controlplane,etcd,worker   20d    v1.21.7
+gecko-middle   Ready    agent,edge                 6d7h   v1.19.3-kubeedge-v1.9.1
+gecko-right    Ready    agent,edge                 6d7h   v1.19.3-kubeedge-v1.9.1
+
+$ kubeclt label node axolotl publish-export-data=
+
+node/axolotl labeled
+```
+
+These labels are used to select which edge node is to receive the application. In this case, the node 'axolotl' is selected.
+
+After finishing deployment and modifications check if the application is running.
 
 ```bash
 $ kubectl get pods -n data-export -o wide
