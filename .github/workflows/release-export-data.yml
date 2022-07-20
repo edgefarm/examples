@@ -12,7 +12,7 @@ on:
 env:
   ARCHITECTURES: linux/arm64,linux/amd64
   REGISTRY: ghcr.io
-  IMAGE_NAME: example-export-data
+  IMAGE_NAME: ${{ github.repository_owner }}/example-export-data
 
 jobs:
   build-and-push-image:
