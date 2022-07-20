@@ -9,7 +9,7 @@ spec:
       properties:
         runtime:
           - publish-export-data
-        image: ghcr.io/edgefarm/example-export-data:pr-6
+        image: ghcr.io/edgefarm/example-export-data:1.0.0-beta.1
         name: publish-export-data
       traits:
         - type: edge-network-participant
