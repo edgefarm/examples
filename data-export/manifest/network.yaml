@@ -10,7 +10,7 @@ spec:
         subjects:
           - name: data-export-subjects
             subjects:
-              - EXPORT.>
+              - export.>
             stream: data-export-stream
         streams:
           - name: data-export-stream

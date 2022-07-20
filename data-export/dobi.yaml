@@ -16,3 +16,5 @@ job=build-and-push-publish-export-data:
     - VERSION={env.GitVersion_ShortSha}
   annotations:
     description: "\t\t-> builds and pushes publish-export-data multiarch docker image"
+    tags:
+      - examples

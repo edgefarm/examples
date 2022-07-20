@@ -9,8 +9,8 @@ from dapr.clients import DaprClient
 import grpc
 
 # Configure these parameter according to your environment
-# Needs to start with `EXPORT.` as this is the global export subject
-EXPORT_SUBJECT = "EXPORT.acceleration"
+# Needs to start with `export.` as this is the global export subject
+EXPORT_SUBJECT = "export.acceleration"
 NETWORK_NAME = "data-export-network"
 # Configurations for data generation
 SLEEPTIME_SECS = 0.013
@@ -48,8 +48,8 @@ async def main():
         payload = {
             "timestamp_ms": timestamp_ms,
             "msg_id": counter,
-            "sensor1": { "x": x, "y": y, "z": z },
-            "sensor2": { "x": x, "y": y, "z": z },
+            "sensor1": {"x": x, "y": y, "z": z},
+            "sensor2": {"x": x, "y": y, "z": z},
         }
 
         # Create a typed message with content type and body

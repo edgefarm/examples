@@ -13,12 +13,15 @@ from pathlib import Path
 dotenv_path = Path('..')
 load_dotenv()
 
+if os.getenv("NATS_SERVER") is None:
+    sys.exit('env variable NATS_SERVER must be set')
+
 # Load nats server from environment variable
-NATS_SERVER = os.getenv("NATS_SERVER", "tls://connect.ngs.global:4222")
+NATS_SERVER = os.getenv("NATS_SERVER")
 
 # Configurations for network
 NATS_CREDS_PATH = "../natsEndpoint.creds"
-EXPORT_SUBJECT = "*.EXPORT.acceleration"
+EXPORT_SUBJECT = "*.export.acceleration"
 CONSUMER = "myconsumer"
 STREAM_NAME = "data-export-network_data-export-stream-aggregate"
 

@@ -9,39 +9,35 @@ The external system, in this example `receive-historic-data`, receives the puffe
 
 The Jupyter Notebook `view-life-data`, can be used to receive and visualize live data from edgefarm.network.
 
-## Usage
+## **Deploy example**
 
-**Deploy example:**
-
-First, create a kubernetes namespace in which to create the edge application and the network.  
+First, create a Kubernetes namespace where you create the edge application and the network.
 
 ```
-kubectl create ns data-export
-
+$ kubectl create namespace data-export
 namespace/data-export created
 ```
 
-Next, the application network will be created in which attributes are defined, such as valid subjects or buffer sizes within the network.
+Next, the [application network](manifest/network.yaml) will be created in which attributes are defined, such as valid subjects or buffer sizes within the network.
 
 ```
-kubectl apply -f manifest/network.yaml -n data-export
-
+$ cd data-export
+$ kubectl apply -f manifest/network.yaml -n data-export
 application.core.oam.dev/data-export-network created
 ```
 
 This creates a new application network within edgefarm.network. This network consists of a 10 MB intermediate buffer on the participating edge nodes and a 100 MB buffer in the main network (usually in the cloud), which collects and aggregates the edge buffers.
 All buffers are managed in the respective file system. Alternatively, they can also be created in memory.
 
-The application definition `manifest/application.yaml` contains a reference to the docker image of example application `publish-export-data`. If necessary, you can modify the docker image's tag for the correct version of the application image. 
+The application definition [manifest/application.yaml](manifest/application.yaml) contains a reference to the docker image of example application `publish-export-data`. If necessary, you can modify the docker image's tag for the correct version of the application image. 
 
-You can either build your own docker image if you like to modify the demos. For this see the [building section](../README.md#building-yourself) of this Readme.
-After any modifications, you need to redeploy the application.
+You can build your own container image if you like to modify the demos. For this see the [building section](../README.md#building-yourself) of this Readme.
+After any modifications, you need to mdify for your custom container image and redeploy the application.
 
 Now, the actual edge application will be rolled out.
 
 ```
 $ kubectl apply -f manifest/application.yaml -n data-export
-
 application.core.oam.dev/data-export created
 ```
 
@@ -49,7 +45,6 @@ The corresponding label for the edge-node must be set.
 
 ```
 $ kubectl get nodes
-
 NAME           STATUS   ROLES                      AGE    VERSION
 axolotl        Ready    agent,edge                 6d7h   v1.19.3-kubeedge-v1.9.1
 test001-1      Ready    controlplane,etcd,worker   20d    v1.21.7
@@ -83,7 +78,7 @@ $ kubectl logs publish-export-data-bjsrk -n data-export -c publish-export-data -
 ...
 ```
 
-**Prepare config files for receiving the export data:**
+## **Preparing config files for receiving exported data**
 
 It is required to prepare two files:
 - `natsEndpoint.creds`: credentials file for a secure access to to your generated data
@@ -92,21 +87,20 @@ It is required to prepare two files:
 
 Get `natsEndpoint.creds` from cluster:
 ```bash
-kubectl get secret -n data-export -o yaml data-export.publish-export-data -o jsonpath='{.data.data-export-network\.creds}' | base64 --decode > data-export/natsEndpoint.creds
+kubectl get secret -n data-export -o yaml data-export.publish-export-data -o jsonpath='{.data.data-export-network\.creds}' | base64 --decode > natsEndpoint.creds
 ```
 
-Prepare `.env` config file:
+Prepare `.env` file and save it to `.env`:
 ```bash
-kubectl get secrets -o jsonpath='{.data.NATS_ADDRESS}' nats-server-info | base64 --decode | xargs printf 'NATS_SERVER="%s"\n' > data-export/.env
+kubectl get secrets -o jsonpath='{.data.NATS_ADDRESS}' nats-server-info | base64 --decode | xargs printf 'NATS_SERVER="%s"\n' > .env
 ```
 
-
-**Receive the historic data:**
+## **Receiving historic data from edgefarm.network**
 
 Execute `receive-historic-data` application to collect histroic data from data endpoint and store data in local file `data.csv`.
 
 ```bash
-$ cd data-export/receive-historic-data
+$ cd receive-historic-data
 $ pip3 install -r requirements.txt
 
 # Run normally without verbose logs...
@@ -129,11 +123,13 @@ The output csv file can be configured by executing the following just before exe
 $ export CSV_FILE=/path/to/csv-file.csv
 ```
 
-**View live data**
+## **Viewing live data**
 
 The view life data example is realized with a Jupyter Notebook. These files can be viewed and executed e.g. with VS Code by installing the extension  [Jupyter](https://marketplace.visualstudio.com/items?itemName=ms-toolsai.jupyter).
 
-To run Jupyter Notebook open the file `data-export/view-life-data/main.ipynb` e.g. in VS Code and click on `Run All`:
+To run Jupyter Notebook open the file `view-life-data/main.ipynb`.
+If you deployed the data-export application on multiple devices, you may want to select one specific by replacing the `*` from variable NODE with the node's name. 
+Using VS Code, after installing the [Jupyter Notebook extension](https://marketplace.visualstudio.com/items?itemName=ms-toolsai.jupyter), you can simply press the `Run All` button: 
 
 ![Run Jupyter Notebook](../docs/run-jupyter-notebook.png)
 
