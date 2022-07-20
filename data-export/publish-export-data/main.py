@@ -62,7 +62,9 @@ async def main():
             )
         except grpc.RpcError as rpc_error:
             if rpc_error.code() == grpc.StatusCode.UNAVAILABLE:
-                logging.info("GRPC connection unavailable")
+                logging.info(
+                    "GRPC connection to dapr unavailable. Retrying...")
+                time.sleep(1)
                 continue
             else:
                 logging.error("Received unknown RPC error: %s", rpc_error)

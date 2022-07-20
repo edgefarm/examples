@@ -2,7 +2,7 @@
 
 This repository contains minimal examples for the usage of EdgeFarm.
 
-- [Export data from edgefarm.network](data-export/README.md) [![publish-export-data](https://github.com/edgefarm/examples/actions/workflows/release-export-data.yaml/badge.svg)](https://github.com/edgefarm/examples/actions/workflows/release-export-data.yaml)
+- [Export data from EdgeFarm.network](data-export/README.md) [![publish-export-data](https://github.com/edgefarm/examples/actions/workflows/release-export-data.yaml/badge.svg)](https://github.com/edgefarm/examples/actions/workflows/release-export-data.yaml)
 - [Mount directory into an edgefarm application](mount/README.md) [![mount](https://github.com/edgefarm/examples/actions/workflows/release-mount.yaml/badge.svg)](https://github.com/edgefarm/examples/actions/workflows/release-mount.yaml)
 
 ## Building yourself
