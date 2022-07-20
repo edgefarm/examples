@@ -18,7 +18,7 @@ NATS_SERVER = os.getenv("NATS_SERVER", "tls://connect.ngs.global:4222")
 
 # Configurations for network
 NATS_CREDS_PATH = "../natsEndpoint.creds"
-EXPORT_SUBJECT = "EXPORT.acceleration"
+EXPORT_SUBJECT = "*.EXPORT.acceleration"
 CONSUMER = "myconsumer"
 STREAM_NAME = "data-export-network_data-export-stream-aggregate"
 
