@@ -28,6 +28,8 @@ async def main():
     dapr_client = DaprClient(address=os.getenv(
         "DAPR_GRPC_ADDRESS", "localhost:3500"))
 
+    node_name = os.getenv("NODE_NAME")
+
     # Local parameters required for statistics calculation and logging
     counter = 0
     total_size = 0
@@ -46,23 +48,15 @@ async def main():
         payload = {
             "timestamp_ms": timestamp_ms,
             "msg_id": counter,
-            "sensor1": {
-                "x": x,
-                "y": y,
-                "z": z
-            },
-            "sensor2": {
-                "x": x,
-                "y": y,
-                "z": z
-            },
+            "sensor1": { "x": x, "y": y, "z": z },
+            "sensor2": { "x": x, "y": y, "z": z },
         }
 
         # Create a typed message with content type and body
         try:
             resp = dapr_client.publish_event(
                 pubsub_name=NETWORK_NAME,
-                topic_name=EXPORT_SUBJECT,
+                topic_name=node_name+"."+EXPORT_SUBJECT,
                 data=json.dumps(payload),
                 data_content_type='application/json',
             )
