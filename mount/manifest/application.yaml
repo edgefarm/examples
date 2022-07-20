@@ -10,7 +10,7 @@ spec:
       properties:
         runtime:
           - mount
-        image: ghcr.io/edgefarm/example-mount:pr-6
+        image: ghcr.io/edgefarm/example-mount:1.0.0-beta.1
         name: rw-files
       traits:
         - type: volumes
