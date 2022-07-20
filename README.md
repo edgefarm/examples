@@ -1,6 +1,6 @@
 # examples
 
-This repository contains minimal examples for edgefarm usage.
+This repository contains minimal examples for the usage of EdgeFarm.
 
 - [Export data from edgefarm.network](data-export/README.md) [![publish-export-data](https://github.com/edgefarm/examples/actions/workflows/release-export-data.yaml/badge.svg)](https://github.com/edgefarm/examples/actions/workflows/release-export-data.yaml)
 - [Mount directory into an edgefarm application](mount/README.md) [![mount](https://github.com/edgefarm/examples/actions/workflows/release-mount.yaml/badge.svg)](https://github.com/edgefarm/examples/actions/workflows/release-mount.yaml)
@@ -12,18 +12,26 @@ This repository contains minimal examples for edgefarm usage.
 ### Setup
 
 In order to build the demo docker images, you need to have docker installed on your system.
-You can modify the demos and build the docker image yourself using a tool called [dobi](https://github.com/dnephin/dobi).
-There is no need to download `dobi` by manually. The wrapper script `dobi.sh` will handle everything for you.
+You can modify the demos and build the container image yourself. 
 To specify the location of the docker image, you can modify the variable `DOCKER_REGISTRY` in the file `default.env`.
 
-Once you've changed you should run `docker login <your-registry>` to allow pushing to your registry.
+Before building the containe image run `docker login [your-registry]` to allow pushing to your registry.
 If you are using docker hub, login with `docker login`.
 
 ### Building
 
-To see a list of all build targets, run
+To list all examples build targets run
 ```bash
-./dobi.sh
+$ ./dobi.sh list -t examples
+[job: version] /gen/gitversion/ Start
+Generation complete.
+[job: version] /gen/gitversion/ Done
+Resources:
+  build-and-push-publish-export-data            -> builds and pushes publish-export-data multiarch docker image
+  build-and-push-rw-files                       -> builds and pushes rw-files multiarch docker image
+
+Tags:
+  alias, examples
 ```
 
 To build the docker images run
@@ -35,7 +43,7 @@ The build job registers `qemu-user-static` to run programs for foreign CPU archi
 
 Once the build has finished, your docker images are located at the speficied docker registry.
 
-## Cleaning up
+### Cleaning up
 
 You can cleanup `qemu-user-static` using `./dobi.sh uninstall-qemu-user-static`.
 
