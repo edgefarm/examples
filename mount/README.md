@@ -2,7 +2,7 @@
 
 This example shows how to mount a directory into an application container on edge device.
 
-The edgefarm.applications app will be rolled out in an edge node that reads a file mounted from the edge device. It reads the file line by line and writes the contents to another file along with a timestamp.
+The EdgeFarm.applications app will be rolled out in an edge node that reads a file mounted from the edge device. It reads the file line by line and writes the contents to another file along with a timestamp.
 
 <!-- The file mount is defined in the deployment manifest `manifest.yaml`. The trait of type `volume` defines the volumes names, paths and permissions. -->
 
@@ -25,7 +25,7 @@ Now, the actual edge application will be rolled out.
 
 ```bash
 $ cd mount
-$ kubectl apply -f mount/manifest/application.yaml -n mount
+$ kubectl apply -f manifest/application.yaml -n mount
 application.core.oam.dev/mount created
 ```
 
@@ -41,7 +41,7 @@ test001-3      Ready    controlplane,etcd,worker   20d    v1.21.7
 gecko-middle   Ready    agent,edge                 6d7h   v1.19.3-kubeedge-v1.9.1
 gecko-right    Ready    agent,edge                 6d7h   v1.19.3-kubeedge-v1.9.1
 
-$ kubeclt label node axolotl mount=
+$ kubectl label node axolotl mount=
 node/axolotl labeled
 ```
 
@@ -51,8 +51,13 @@ After finishing deployment and modifications check if the application is running
 
 ```bash
 $ kubectl get pods -n mount -o wide
+NAME             READY   STATUS              RESTARTS   AGE   IP           NODE        NOMINATED NODE   READINESS GATES
+rw-files-l9s6j   1/1     ContainerCreating   0          3s    172.17.0.4   axolotl     <none>           <none>
+
+# Wait until the STATUS is `Running`
+$ kubectl get pods -n mount -o wide
 NAME             READY   STATUS    RESTARTS   AGE   IP           NODE        NOMINATED NODE   READINESS GATES
-rw-files-l9s6j   1/1     Running   0          44m   172.17.0.4   axolotl     <none>           <none>
+rw-files-l9s6j   1/1     Running   0          40s   172.17.0.4   axolotl     <none>           <none>
 ```
 
 ## Check results
@@ -74,4 +79,24 @@ $ kubectl logs rw-files-l9s6j -n mount -f
 2022-04-07 12:25:31 root         INFO     Read data from file: End of file reached
 2022-04-07 12:25:31 root         INFO     Wrtie data to file: 2022-04-07 12:25:31.628804: End of file reached
 ...
+```
+
+## Cleaning up
+
+```bash
+# Delete the application
+$ kubectl delete application mount -n mount
+application.core.oam.dev "mount" deleted
+
+# See that the Pods containing the workload are terminating
+$ kubectl get pods -n mount
+rw-files-jmclx   1/1     Terminating   0          4m43s
+
+# Wait until all Pods are deleted
+$ kubectl get pods -n mount
+No resources found in mount namespace.
+
+# Delete the namespace
+$ kubectl delete namespace mount
+namespace "mount" deleted
 ```

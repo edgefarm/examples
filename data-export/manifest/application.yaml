@@ -9,11 +9,10 @@ spec:
       properties:
         runtime:
           - publish-export-data
-        image: ci4rail/publish-export-data:latest
+        image: ghcr.io/edgefarm/example-export-data:pr-6
         name: publish-export-data
       traits:
         - type: edge-network-participant
           properties:
             networks:
               - data-export-network
-

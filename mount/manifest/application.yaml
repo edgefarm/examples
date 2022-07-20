@@ -10,7 +10,7 @@ spec:
       properties:
         runtime:
           - mount
-        image: ci4rail/rw-files
+        image: ghcr.io/edgefarm/example-mount:pr-6
         name: rw-files
       traits:
         - type: volumes

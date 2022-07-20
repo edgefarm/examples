@@ -8,6 +8,8 @@ from nats.aio.client import Client as Nats
 import datetime
 from dotenv import load_dotenv
 from pathlib import Path
+import sys
+import argparse
 
 # Load config file
 dotenv_path = Path('..')
@@ -21,7 +23,8 @@ NATS_SERVER = os.getenv("NATS_SERVER")
 
 # Configurations for network
 NATS_CREDS_PATH = "../natsEndpoint.creds"
-EXPORT_SUBJECT = "*.export.acceleration"
+NODE = "*"
+EXPORT_SUBJECT = NODE+".export.acceleration"
 CONSUMER = "myconsumer"
 STREAM_NAME = "data-export-network_data-export-stream-aggregate"
 
@@ -33,11 +36,20 @@ csv_file_path = os.getenv("CSV_FILE", "data.csv")
 csv_file = open(csv_file_path, "a+")
 
 
+parser = argparse.ArgumentParser(description='Description of your program')
+parser.add_argument(
+    '-f', '--format', help='"timestamp" or "date" (default)', required=False, default="date")
+args = vars(parser.parse_args())
+if args["format"] != "date" and args["format"] != "timestamp":
+    sys.exit("Invalid format. Use 'date' or 'timestamp'")
+
+
 async def error_cb(e):
     logging.info(e)
 
 
 async def main():
+    global args
     loop = asyncio.get_event_loop()
 
     # Connect to global nats
@@ -64,6 +76,7 @@ async def main():
     async def cb(msg):
         global up_to_date
         await msg.ack()
+        device = msg.subject.split(".")[0]
 
         data = json.loads(msg.data.decode())["data"]
         logging.debug("Received data: %s" % data)
@@ -71,12 +84,6 @@ async def main():
         if not up_to_date and abs(data["timestamp_ms"] - int(time.time()*1000.0)) < 5000:
             up_to_date = True
             logging.info("Received all historic data. Proceed with live data.")
-
-        # formtat timestamp into a human readable format
-        dt_object = datetime.datetime.fromtimestamp(
-            int(data["timestamp_ms"])/1000.0)
-        date_string = dt_object.strftime("%Y-%m-%d")
-        time_string = dt_object.strftime("%H:%M:%S.%f")
 
         # Get sensor data from message
         x1 = data["sensor1"]["x"]
@@ -86,12 +93,24 @@ async def main():
         y2 = data["sensor2"]["y"]
         z2 = data["sensor2"]["z"]
 
-        # Print data in the following format into csv file:
-        # date,time,x1,y1,z1,x2,y2,z2
-        # "2020-01-01","00:00:00",1.5235078460966271,2.1941572164732808,3.8712016695848748,1.5235078460966271,2.1941572164732808,3.8712016695848748
+        if args["format"] == "date":
+            # format timestamp into a human readable format
+            dt_object = datetime.datetime.fromtimestamp(
+                int(data["timestamp_ms"])/1000.0)
+            date_string = dt_object.strftime("%Y-%m-%d")
+            time_string = dt_object.strftime("%H:%M:%S.%f")
 
-        csv_line = "%s,%s,%f,%f,%f,%f,%f,%f" % (
-            date_string, time_string, x1, y1, z1, x2, y2, z2)
+            # Print data in the following format into csv file:
+            # date,time,x1,y1,z1,x2,y2,z2
+            # "2020-01-01","00:00:00",1.5235078460966271,2.1941572164732808,3.8712016695848748,1.5235078460966271,2.1941572164732808,3.8712016695848748
+            csv_line = "%s,%s,%s,%f,%f,%f,%f,%f,%f" % (
+                date_string, time_string, device, x1, y1, z1, x2, y2, z2)
+        else:
+            # Print data in the following format into csv file:
+            # date,time,x1,y1,z1,x2,y2,z2
+            # 1658323258331,1.5235078460966271,2.1941572164732808,3.8712016695848748,1.5235078460966271,2.1941572164732808,3.8712016695848748
+            csv_line = "%s,%s,%f,%f,%f,%f,%f,%f" % (
+                int(data["timestamp_ms"]), device, x1, y1, z1, x2, y2, z2)
 
         logging.debug("Write to file: %s" % csv_line)
         csv_file.write(csv_line + "\n")
