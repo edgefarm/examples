@@ -142,18 +142,26 @@ Scroll down to the bottom of the file to view the graph.
 
 ```bash
 # Delete the application
-$ kubectl delete application data-export data-export-network -n export-data
+$ kubectl delete application data-export -n data-export
 application.core.oam.dev "data-export" deleted
+
+# Wait until all resources are deleted
+# See that the Pods containing the workload are terminating
+$ kubectl get pods -n data-export -o wide
+NAME                        READY   STATUS        RESTARTS   AGE
+publish-export-data-jmclx   1/1     Terminating   0          4m43s
+
+$ kubectl get pods -n data-export -o wide
+No resources found in data-export namespace.
+
+# Then delete the network
+$ kubectl delete application data-export-network -n data-export
 application.core.oam.dev "data-export-network" deleted
 
-# See that the Pods containing the workload are terminating
-$ kubectl get pods -n export-data -o wide
-TODO-jmclx   1/1     Terminating   0          4m43s
-
 # Wait until all Pods are deleted
-$ kubectl get pods -n export-data
+$ kubectl get pods -n data-export
 No resources found in mount namespace.
 
-$ kubectl delete namespace export-data
-namespace "export-data" deleted
+$ kubectl delete namespace data-export
+namespace "data-export" deleted
 ```
