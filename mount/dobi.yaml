@@ -16,3 +16,5 @@ job=build-and-push-rw-files:
     - VERSION={env.GitVersion_ShortSha}
   annotations:
     description: "\t\t\t-> builds and pushes rw-files multiarch docker image"
+    tags:
+      - examples

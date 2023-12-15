@@ -1,34 +1,65 @@
 # data-export
 
-This example shows how to export data from edgefarm.network to an external system.
+This example shows the data transport via EdgeFarm.network and the transfer of this data to external systems.
 
-The edge application `publish-export-data` generates random data and publishes it into edgefarm.network data export.
+For this purpose, an EdgeFarm.applications app will be rolled out in an edge node and continuously generates data. 
+This data will be pushes into EdgeFarm.network and delivered to the external system.
 
-The deployment manifest `manifest.yaml` defines an `application-network`, which is required for data transportation. The producing `edge-worker` needs to be a `participant` of this network. This is defined in the trait `edge-network-participant`. The network needs to have a stream, which is required for data puffering and data export. This is configured in stream section of the `application-network`.
+The external system, in this example `receive-historic-data`, receives the puffered data and stores it into a local `csv` file.
 
-The separate application `receive-historic-data`, which could run anywhere but requires a internet connection, receives the puffered data and stores it into a local `csv` file.
+The Jupyter Notebook `view-life-data`, can be used to receive and visualize live data from EdgeFarm.network.
 
-The Jupyter Notebook `view-life-data`, can be used to receive live data from data endpoint and view it in graphs.
+## **Deploy example**
 
-## Usage
+First, create a Kubernetes namespace where you create the edge application and the network.
 
-**Deploy edge application:**
-
-`manifest.yaml` is the deployment manifest of this example. This contains a reference to the docker image of example application `publish-export-data`. Modify the docker image's tag for the correct version of the application image.
-
-You can either build your own docker image if you like to modify the demos. For this see the [building section](../README.md#building-yourself) of this Readme.
-
-Apply the application using kubectl.
-
-```bash
-$ kubectl apply -f data-export/manifest.yaml
+```
+$ kubectl create namespace data-export
 namespace/data-export created
+```
+
+Next, the [application network](manifest/network.yaml) will be created in which attributes are defined, such as valid subjects or buffer sizes within the network.
+
+```
+$ cd data-export
+$ kubectl apply -f manifest/network.yaml -n data-export
+application.core.oam.dev/data-export-network created
+```
+
+This creates a new application network within EdgeFarm.network. This network consists of a 10 MB intermediate buffer on the participating edge nodes and a 100 MB buffer in the main network (usually in the cloud), which collects and aggregates the edge buffers.
+All buffers are managed in the respective file system. Alternatively, they can also be created in memory.
+
+The application definition [manifest/application.yaml](manifest/application.yaml) contains a reference to the docker image of example application `publish-export-data`. If necessary, you can modify the docker image's tag for the correct version of the application image. 
+
+You can build your own container image if you like to modify the demos. For this see the [building section](../README.md#building-yourself) of this Readme.
+After any modifications, you need to mdify for your custom container image and redeploy the application.
+
+Now, the actual edge application will be rolled out.
+
+```
+$ kubectl apply -f manifest/application.yaml -n data-export
 application.core.oam.dev/data-export created
 ```
 
-**Check the status of the edge application:**
+The corresponding label for the edge node must be set.
 
-Check if the application is running.
+```
+$ kubectl get nodes
+NAME           STATUS   ROLES                      AGE    VERSION
+axolotl        Ready    agent,edge                 6d7h   v1.19.3-kubeedge-v1.9.1
+test001-1      Ready    controlplane,etcd,worker   20d    v1.21.7
+test001-2      Ready    controlplane,etcd,worker   20d    v1.21.7
+test001-3      Ready    controlplane,etcd,worker   20d    v1.21.7
+gecko-middle   Ready    agent,edge                 6d7h   v1.19.3-kubeedge-v1.9.1
+gecko-right    Ready    agent,edge                 6d7h   v1.19.3-kubeedge-v1.9.1
+
+$ kubectl label node axolotl publish-export-data=
+node/axolotl labeled
+```
+
+These labels are used to select which edge node is to receive the application. In this case, the node 'axolotl' is selected.
+
+After finishing deployment and modifications check if the application is running.
 
 ```bash
 $ kubectl get pods -n data-export -o wide
@@ -46,7 +77,7 @@ $ kubectl logs publish-export-data-bjsrk -n data-export -c publish-export-data -
 ...
 ```
 
-**Prepare config files for receiving the export data:**
+## **Preparing config files for receiving exported data**
 
 It is required to prepare two files:
 - `natsEndpoint.creds`: credentials file for a secure access to to your generated data
@@ -55,21 +86,20 @@ It is required to prepare two files:
 
 Get `natsEndpoint.creds` from cluster:
 ```bash
-kubectl get secret -n data-export -o yaml data-export.publish-export-data -o jsonpath='{.data.data-export-network\.creds}' | base64 --decode > data-export/natsEndpoint.creds
+kubectl get secret -n data-export -o yaml data-export.publish-export-data -o jsonpath='{.data.data-export-network\.creds}' | base64 --decode > natsEndpoint.creds
 ```
 
-Prepare `.env` config file:
+Prepare `.env` file and save it to `.env`:
 ```bash
-kubectl get secrets -o jsonpath='{.data.NATS_ADDRESS}' nats-server-info | base64 --decode | xargs printf 'NATS_SERVER="%s"\n' > data-export/.env
+kubectl get secrets -o jsonpath='{.data.NATS_ADDRESS}' nats-server-info | base64 --decode | xargs printf 'NATS_SERVER="%s"\n' > .env
 ```
 
-
-**Receive the historic data:**
+## **Receiving historic data from EdgeFarm.network**
 
 Execute `receive-historic-data` application to collect histroic data from data endpoint and store data in local file `data.csv`.
 
 ```bash
-$ cd data-export/receive-historic-data
+$ cd receive-historic-data
 $ pip3 install -r requirements.txt
 
 # Run normally without verbose logs...
@@ -92,11 +122,13 @@ The output csv file can be configured by executing the following just before exe
 $ export CSV_FILE=/path/to/csv-file.csv
 ```
 
-**View live data**
+## **Viewing live data**
 
 The view life data example is realized with a Jupyter Notebook. These files can be viewed and executed e.g. with VS Code by installing the extension  [Jupyter](https://marketplace.visualstudio.com/items?itemName=ms-toolsai.jupyter).
 
-To run Jupyter Notebook open the file `data-export/view-life-data/main.ipynb` e.g. in VS Code and click on `Run All`:
+To run Jupyter Notebook open the file `view-life-data/main.ipynb`.
+If you deployed the data-export application on multiple devices, you may want to select one specific by replacing the `*` from variable NODE with the node's name. 
+Using VS Code, after installing the [Jupyter Notebook extension](https://marketplace.visualstudio.com/items?itemName=ms-toolsai.jupyter), you can simply press the `Run All` button: 
 
 ![Run Jupyter Notebook](../docs/run-jupyter-notebook.png)
 
@@ -105,3 +137,31 @@ Scroll down to the bottom of the file to view the graph.
 ![Jupyter Output Example](../docs/data-export-jupyter-output.png)
 
 **⚠ NOTE:** If you experience issues with the notebook regarding missing packages please run `pip3 install -r requirements.txt` in the notebook directory.
+
+## Cleaning up
+
+```bash
+# Delete the application
+$ kubectl delete application data-export -n data-export
+application.core.oam.dev "data-export" deleted
+
+# Wait until all resources are deleted
+# See that the Pods containing the workload are terminating
+$ kubectl get pods -n data-export -o wide
+NAME                        READY   STATUS        RESTARTS   AGE
+publish-export-data-jmclx   1/1     Terminating   0          4m43s
+
+$ kubectl get pods -n data-export -o wide
+No resources found in data-export namespace.
+
+# Then delete the network
+$ kubectl delete application data-export-network -n data-export
+application.core.oam.dev "data-export-network" deleted
+
+# Wait until all Pods are deleted
+$ kubectl get pods -n data-export
+No resources found in mount namespace.
+
+$ kubectl delete namespace data-export
+namespace "data-export" deleted
+```

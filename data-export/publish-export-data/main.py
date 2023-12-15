@@ -9,8 +9,8 @@ from dapr.clients import DaprClient
 import grpc
 
 # Configure these parameter according to your environment
-# Needs to start with `EXPORT.` as this is the global export subject
-EXPORT_SUBJECT = "EXPORT.acceleration"
+# Needs to start with `export.` as this is the global export subject
+EXPORT_SUBJECT = "export.acceleration"
 NETWORK_NAME = "data-export-network"
 # Configurations for data generation
 SLEEPTIME_SECS = 0.013
@@ -27,6 +27,8 @@ async def main():
     # Initialize dapr client
     dapr_client = DaprClient(address=os.getenv(
         "DAPR_GRPC_ADDRESS", "localhost:3500"))
+
+    node_name = os.getenv("NODE_NAME")
 
     # Local parameters required for statistics calculation and logging
     counter = 0
@@ -46,29 +48,23 @@ async def main():
         payload = {
             "timestamp_ms": timestamp_ms,
             "msg_id": counter,
-            "sensor1": {
-                "x": x,
-                "y": y,
-                "z": z
-            },
-            "sensor2": {
-                "x": x,
-                "y": y,
-                "z": z
-            },
+            "sensor1": {"x": x, "y": y, "z": z},
+            "sensor2": {"x": x, "y": y, "z": z},
         }
 
         # Create a typed message with content type and body
         try:
             resp = dapr_client.publish_event(
                 pubsub_name=NETWORK_NAME,
-                topic_name=EXPORT_SUBJECT,
+                topic_name=node_name+"."+EXPORT_SUBJECT,
                 data=json.dumps(payload),
                 data_content_type='application/json',
             )
         except grpc.RpcError as rpc_error:
             if rpc_error.code() == grpc.StatusCode.UNAVAILABLE:
-                logging.info("GRPC connection unavailable")
+                logging.info(
+                    "GRPC connection to dapr unavailable. Retrying...")
+                time.sleep(1)
                 continue
             else:
                 logging.error("Received unknown RPC error: %s", rpc_error)

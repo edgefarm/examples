@@ -1,36 +1,16 @@
-kind: Namespace
-apiVersion: v1
-metadata:
-  name: data-export
-  labels:
-    name: data-export
----
 apiVersion: core.oam.dev/v1beta1
 kind: Application
 metadata:
-  name: data-export
-  namespace: data-export
+  name: data-export-network
 spec:
   components:
-    - name: publish-export-data
-      type: edge-worker
-      properties:
-        runtime:
-          - publish-export-data
-        image: ci4rail/publish-export-data:latest
-        name: publish-export-data
-      traits:
-        - type: edge-network-participant
-          properties:
-            networks:
-              - data-export-network
     - type: application-network
       name: data-export-network
       properties:
         subjects:
           - name: data-export-subjects
             subjects:
-              - EXPORT.>
+              - export.>
             stream: data-export-stream
         streams:
           - name: data-export-stream

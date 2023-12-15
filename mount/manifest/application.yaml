@@ -1,10 +1,3 @@
-kind: Namespace
-apiVersion: v1
-metadata:
-  name: mount
-  labels:
-    name: mount
----
 apiVersion: core.oam.dev/v1beta1
 kind: Application
 metadata:
@@ -15,7 +8,9 @@ spec:
     - name: rw-files
       type: edge-worker
       properties:
-        image: ci4rail/rw-files
+        runtime:
+          - mount
+        image: ghcr.io/edgefarm/example-mount:1.0.0-beta.1
         name: rw-files
       traits:
         - type: volumes
